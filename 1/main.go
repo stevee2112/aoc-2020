@@ -36,7 +36,6 @@ func main() {
 	_, part1Val1, part1Val2 = getSummers(sum, expenseIndex)
 
 	// Part 2
-
 	found := false
 	for value, _ := range expenseIndex {
 		needed := sum - value
