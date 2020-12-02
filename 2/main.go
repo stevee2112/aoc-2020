@@ -21,26 +21,33 @@ func main() {
 	scanner := bufio.NewScanner(input)
 
 	part1Valid := 0
+	part2Valid := 0
 	for scanner.Scan() {
 		inputStr := scanner.Text()
 		inputParts := strings.Split(inputStr, ":")
 		policyStr := strings.TrimSpace(inputParts[0])
 		policyParts := strings.Split(policyStr, " ")
 		policyRange := strings.Split(policyParts[0], "-")
-		min, _ := strconv.Atoi(policyRange[0])
-		max, _ := strconv.Atoi(policyRange[1])
+		index1, _ := strconv.Atoi(policyRange[0])
+		index2, _ := strconv.Atoi(policyRange[1])
 		letter := policyParts[1];
 		password := strings.TrimSpace(inputParts[1])
 
+		// part 1
 		count := strings.Count(password, letter)
-
-		if count >= min && count <= max {
+		if count >= index1 && count <= index2 {
 			part1Valid++
+		}
+
+		// part 2
+		pos1 := string(password[index1 - 1])
+		pos2 := string(password[index2 - 1])
+
+		if (pos1 == letter || pos2 == letter) && !(pos1 == pos2) {
+				part2Valid++
 		}
 	}
 
-
 	fmt.Printf("Part 1: %d\n", part1Valid)
-	//fmt.Printf("Part 2: %d\n", part2Val1 * part2Val2 * part2Val3)
+	fmt.Printf("Part 2: %d\n", part2Valid)
 }
-
