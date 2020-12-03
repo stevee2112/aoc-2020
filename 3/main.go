@@ -35,11 +35,26 @@ func main() {
 		y++
 	}
 
-	forest.Print()
-
 	// part 1
-	slopeX := 3
-	slopeY := 1
+	fmt.Printf("Part 1: %d\n", getTrees(forest, 3, 1))
+
+	// part 2
+	trees := []int{}
+	allMultiplied := 1;
+
+	trees = append(trees, getTrees(forest, 1, 1))
+	trees = append(trees, getTrees(forest, 3, 1))
+	trees = append(trees, getTrees(forest, 5, 1))
+	trees = append(trees, getTrees(forest, 7, 1))
+	trees = append(trees, getTrees(forest, 1, 2))
+
+	for _, value := range trees {
+		allMultiplied *= value
+	}
+	fmt.Printf("Part 2: %d\n", allMultiplied)
+}
+
+func getTrees(forest util.Grid, slopeX int, slopeY int) int {
 	trees := 0
 
 	x := slopeX;
@@ -51,6 +66,5 @@ func main() {
 		x = x % (forest.MaxX + 1)
 	}
 
-	fmt.Printf("Part 1: %d\n", trees)
-	//fmt.Printf("Part 2: %d\n", part2Valid)
+	return trees
 }
