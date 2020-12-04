@@ -45,12 +45,21 @@ func main() {
 	passports = append(passports, *currentPassport)
 
 	// Part 1
-	validPassports := 0
+	validPassportsPart1 := 0
 	for _, passport := range passports {
-		if passport.IsValid() {
-			validPassports++
+		if passport.HasRequiredFields() {
+			validPassportsPart1++
 		}
 	}
 
-	fmt.Printf("Part 1: %d\n", validPassports)
+	// Part 2
+	validPassportsPart2 := 0
+	for _, passport := range passports {
+		if passport.HasRequiredFields() && passport.IsValid() {
+			validPassportsPart2++
+		}
+	}
+
+	fmt.Printf("Part 1: %d\n", validPassportsPart1)
+	fmt.Printf("Part 2: %d\n", validPassportsPart2)
 }
