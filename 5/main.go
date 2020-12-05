@@ -20,17 +20,42 @@ func main() {
 	scanner := bufio.NewScanner(input)
 
 	highestSeatId := 0
+	seats := []int{}
 	for scanner.Scan() {
 		inputStr := scanner.Text()
 
+		seatId := getSeatId(inputStr)
+		seats = append(seats, seatId)
+
 		// Part 1
-		if seatId := getSeatId(inputStr);seatId > highestSeatId {
+		if seatId > highestSeatId {
 			highestSeatId = seatId
 		}
 	}
 
+	// Part 2
+	seatsTaken := make([]bool, highestSeatId + 1)
+
+	for _, seatId := range seats {
+		seatsTaken[seatId] = true
+	}
+
+	pastFront := false
+	emptySeat := 0
+
+	for seat, taken := range seatsTaken {
+		if pastFront == false && taken == true {
+			pastFront = true
+		}
+
+		if pastFront == true && taken == false {
+			emptySeat = seat
+			break
+		}
+	}
+
 	fmt.Printf("Part 1: %d\n", highestSeatId)
-	fmt.Printf("Part 2: %d\n", 0)
+	fmt.Printf("Part 2: %d\n", emptySeat)
 }
 
 func getSeatId(seatCode string) int {
