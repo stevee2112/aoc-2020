@@ -1,6 +1,7 @@
 package main
 
 import (
+	"stevee2112/aoc-2020/types"
 	"fmt"
 	"os"
 	"runtime"
@@ -20,18 +21,18 @@ func main() {
 	defer input.Close()
 	scanner := bufio.NewScanner(input)
 
-	groups := []map[string]bool{}
-	group := map[string]bool{}
+	groups := []types.Group{}
+	group := types.NewGroup()
 	for scanner.Scan() {
 		inputStr := scanner.Text()
 
 		if inputStr == "" {
 			groups = append(groups, group)
-			group = map[string]bool{}
-		} else { // passport data
-
+			group = types.NewGroup()
+		} else { // data
+			group.Size++
 			for _, question := range inputStr {
-				group[string(question)] = true
+				group.YesAnswers[string(question)]++
 			}
 		}
 	}
@@ -42,10 +43,19 @@ func main() {
 	// Part 1
 	totalYes := 0
 	for _, group := range groups {
-		totalYes += len(group)
+		totalYes += len(group.YesAnswers)
 	}
 
+	// Part 2
+	totalAllAnswered := 0
+	for _, group := range groups {
+		for _, total := range group.YesAnswers {
+			if total == group.Size {
+				totalAllAnswered++
+			}
+		}
+	}
 
 	fmt.Printf("Part 1: %d\n", totalYes)
-	fmt.Printf("Part 2: %d\n", 0)
+	fmt.Printf("Part 2: %d\n", totalAllAnswered)
 }
