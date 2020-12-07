@@ -40,6 +40,17 @@ func (b *Rules) ContainsBagColor(ruleColor string, searchColor string) bool {
 	return false
 }
 
+func (b *Rules) BagCount(bagColor string) int {
+	totalBags := 0
+	bagRule := b.rules[bagColor]
+
+	for color, count := range bagRule.Children {
+		totalBags += count
+		totalBags += (count * b.BagCount(color))
+	}
+
+	return totalBags
+}
 
 type Rule struct {
 	Color string

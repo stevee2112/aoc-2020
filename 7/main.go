@@ -30,7 +30,7 @@ func main() {
 	}
 
 	fmt.Printf("Part 1: %d\n", len(bagRules.PossibleBags("shiny gold")))
-	fmt.Printf("Part 2: %d\n", 0)
+	fmt.Printf("Part 2: %d\n", bagRules.BagCount("shiny gold"))
 }
 
 func parseAndMakeRule(ruleString string) types.Rule {
