@@ -37,7 +37,6 @@ func main() {
 	part1Accumulator, _ := bootSequence.Run()
 
 	// Part 2
-	bootSequence.Reset()
 	bootSequence.Repair()
 	part2Accumulator, _ := bootSequence.Run()
 

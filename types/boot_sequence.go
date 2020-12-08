@@ -27,6 +27,7 @@ func (b *BootSequence) AddInstruction(instruction Instruction) {
 
 func (b *BootSequence) Run() (int, error) {
 
+	b.Reset()
 	done := false
 
 	for !done {
@@ -59,7 +60,6 @@ func (b *BootSequence) Repair() () {
 	repairIndex := 0
 
 	for err != nil {
-		b.Reset()
 
 		currentInstruction := b.instructions[repairIndex]
 
@@ -83,9 +83,6 @@ func (b *BootSequence) Repair() () {
 			b.instructions[repairIndex - 1] = currentInstruction
 		}
 	}
-
-	// Now that is is repaired reset
-	b.Reset()
 }
 
 
