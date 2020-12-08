@@ -17,7 +17,7 @@ func main() {
 	// Get Data
 	_, file, _,  _ := runtime.Caller(0)
 
-	input, _ := os.Open(path.Dir(file) + "/example")
+	input, _ := os.Open(path.Dir(file) + "/input")
 
 	defer input.Close()
 	scanner := bufio.NewScanner(input)
@@ -33,8 +33,14 @@ func main() {
 		bootSequence.AddInstruction(types.NewInstruction(instruction, arg))
 	}
 
+	// Part 1
 	part1Accumulator, _ := bootSequence.Run()
 
+	// Part 2
+	bootSequence.Reset()
+	bootSequence.Repair()
+	part2Accumulator, _ := bootSequence.Run()
+
 	fmt.Printf("Part 1: %d\n", part1Accumulator)
-	fmt.Printf("Part 2: %d\n", 0)
+	fmt.Printf("Part 2: %d\n", part2Accumulator)
 }

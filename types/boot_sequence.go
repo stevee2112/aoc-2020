@@ -8,6 +8,7 @@ type BootSequence struct {
 	instructions []Instruction
 	accumulator int
 	at int
+	visits []int
 }
 
 func NewBootSequence() BootSequence {
@@ -15,11 +16,13 @@ func NewBootSequence() BootSequence {
 		[]Instruction{},
 		0,
 		0,
+		[]int{},
 	}
 }
 
 func (b *BootSequence) AddInstruction(instruction Instruction) {
 	b.instructions = append(b.instructions, instruction)
+	b.visits = append(b.visits, 0)
 }
 
 func (b *BootSequence) Run() (int, error) {
@@ -27,20 +30,68 @@ func (b *BootSequence) Run() (int, error) {
 	done := false
 
 	for !done {
-		instruction := &b.instructions[b.at]
+		instruction := b.instructions[b.at]
 
-		if instruction.Visits > 0 {
+		if b.visits[b.at] > 0 {
 			return b.accumulator, errors.New("Instruction visited twice")
 		}
 
 		b.ExecuteInstruction(instruction)
+
+		if b.at >= len(b.instructions) {
+			done = true
+		}
 	}
 
 	return b.accumulator, nil
 
 }
 
-func (b *BootSequence) ExecuteInstruction(instruction *Instruction) {
+func (b *BootSequence) Reset() () {
+	b.accumulator = 0
+	b.at = 0
+	b.visits = make([]int, len(b.visits))
+}
+
+func (b *BootSequence) Repair() () {
+	_, err  := b.Run()
+
+	repairIndex := 0
+
+	for err != nil {
+		b.Reset()
+
+		currentInstruction := b.instructions[repairIndex]
+
+		newInstruction := ""
+		if currentInstruction.Operation == "nop" {
+			newInstruction = "jmp"
+		} else if currentInstruction.Operation == "jmp" {
+			newInstruction = "nop"
+		} else if currentInstruction.Operation == "acc" {
+			repairIndex++
+			continue
+		}
+
+		b.instructions[repairIndex] = NewInstruction(newInstruction, currentInstruction.Arg)
+
+		repairIndex++
+		_, err  = b.Run()
+
+		// Set old instruction back if still corrupt
+		if err != nil {
+			b.instructions[repairIndex - 1] = currentInstruction
+		}
+	}
+
+	// Now that is is repaired reset
+	b.Reset()
+}
+
+
+func (b *BootSequence) ExecuteInstruction(instruction Instruction) {
+
+	b.visits[b.at]++
 
 	switch (instruction.Operation) {
 	case "nop":
@@ -51,20 +102,16 @@ func (b *BootSequence) ExecuteInstruction(instruction *Instruction) {
 	case "jmp":
 		b.at += instruction.Arg
 	}
-
-	instruction.Visits++
 }
 
 type Instruction struct {
 	Operation string
 	Arg int
-	Visits int
 }
 
 func NewInstruction(instruction string, arg int) Instruction {
 	return Instruction{
 		instruction,
 		arg,
-		0,
 	}
 }
