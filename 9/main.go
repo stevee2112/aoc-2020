@@ -32,8 +32,11 @@ func main() {
 	}
 
 	// Part 1
-	part1 := xmas.Break()
+	part1 := xmas.BreakNumber()
+
+	// Part 2
+	part2 := xmas.Break(part1)
 
 	fmt.Printf("Part 1: %d\n", part1)
-	fmt.Printf("Part 2: %d\n", 0)
+	fmt.Printf("Part 2: %d\n", part2)
 }
