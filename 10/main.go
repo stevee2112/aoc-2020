@@ -12,6 +12,8 @@ import (
 	//	"regexp"
 )
 
+var pathCountCache  map[string]int
+
 func main() {
 
 	// Get Data
@@ -36,6 +38,8 @@ func main() {
 	// Add device adapters
 	adapters = append(adapters, adapters[len(adapters) - 1] + 3)
 
+	pathCountCache = map[string]int{}
+
 	differences, _ := getJoltRating(adapters)
 	pathCount := getPathCount(adapters)
 
@@ -53,6 +57,13 @@ func getPathCount(adapters []int) int {
 }
 
 func pathCount(adapters []int) int {
+
+	// add cache here based on adapter string and paths
+	cacheKey := intToString(adapters)
+
+	if pathCount,exists := pathCountCache[cacheKey]; exists {
+		return pathCount
+	}
 
 	var paths int
 
@@ -72,7 +83,7 @@ func pathCount(adapters []int) int {
 		}
 	}
 
-	fmt.Println(paths)
+	pathCountCache[cacheKey] = paths
 
 	return paths
 }
@@ -92,4 +103,15 @@ func getJoltRating(adapters []int) (map[int]int, int) {
 	}
 
 	return differences, jolts
+}
+
+func intToString(ints []int) string {
+
+	string := ""
+
+	for _, value := range ints {
+		string = fmt.Sprintf("%s%s", string, strconv.Itoa(value))
+	}
+
+	return string
 }
