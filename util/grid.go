@@ -163,3 +163,21 @@ func (g *Grid) Print() {
 		fmt.Println(row)
 	}
 }
+
+func (g *Grid) PrintWithFill(fill string) {
+
+	for y := g.MinX; y <= g.MaxY; y++ {
+		row := ""
+		for x := g.MinX; x <= g.MaxX; x++ {
+			value :=  g.GetValue(x, y)
+
+			if value == nil {
+				value = fill
+			}
+
+			row += fmt.Sprintf("%v", value)
+		}
+
+		fmt.Println(row)
+	}
+}
