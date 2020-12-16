@@ -107,6 +107,34 @@ func (g *Grid) GetAdjacent(coordinate Coordinate) []Coordinate {
 	return adjacent
 }
 
+// Returns all coordinates from the given location and slope till the end of grid
+// The first value in the returned slice is the closest to the provided coordinate
+func (g *Grid) GetFromSlope(coordinate Coordinate, slopeX int, slopeY int) []Coordinate {
+	coordinates := []Coordinate{}
+
+	// No slope given
+	if slopeX == 0 && slopeY == 0 {
+		return coordinates;
+	}
+
+	atX := coordinate.X + slopeX
+	atY := coordinate.Y + slopeY
+
+	for {
+		newCoordinate := g.GetCoordinate(atX, atY)
+
+		if newCoordinate.Value == nil {
+			break
+		}
+
+		coordinates = append(coordinates, newCoordinate)
+		atX += slopeX
+		atY += slopeY
+	}
+
+	return coordinates
+}
+
 func (g *Grid) Iterate(callback func (coordinate Coordinate)) {
 	for y := g.MinX; y <= g.MaxY; y++ {
 		for x := g.MinX; x <= g.MaxX; x++ {
