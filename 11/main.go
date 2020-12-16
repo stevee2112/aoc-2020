@@ -16,7 +16,7 @@ func main() {
 	// Get Data
 	_, file, _,  _ := runtime.Caller(0)
 
-	input, _ := os.Open(path.Dir(file) + "/input")
+	input, _ := os.Open(path.Dir(file) + "/example")
 
 	defer input.Close()
 	scanner := bufio.NewScanner(input)
@@ -36,19 +36,23 @@ func main() {
 	}
 
 	// Part 1
-	checksum := seats.Checksum()
+	seatsPart1 := seats
+	checksumPart1 := seatsPart1.Checksum()
+	seatsPart1.Print()
 
 	for {
-		seats = changeAllSeats(seats)
-		if seats.Checksum() == checksum {
+		fmt.Printf("\f\f")
+		seatsPart1 = changeAllSeatsPart1(seatsPart1)
+		seatsPart1.Print()
+		if seatsPart1.Checksum() == checksumPart1 {
 			break
 		}
 
-		checksum = seats.Checksum()
+		checksumPart1 = seatsPart1.Checksum()
 	}
 
 	totalOccupied := 0
-	seats.Iterate(func(coordinate util.Coordinate) {
+	seatsPart1.Iterate(func(coordinate util.Coordinate) {
 		if fmt.Sprintf("%v", coordinate.Value) == "#" {
 			totalOccupied++
 		}
@@ -58,19 +62,19 @@ func main() {
 	fmt.Printf("Part 2: %d\n", 0)
 }
 
-func changeAllSeats(seats util.Grid) util.Grid {
+func changeAllSeatsPart1(seats util.Grid) util.Grid {
 	newSeats := util.Grid{}
 
 	seats.Iterate(func(coordinate util.Coordinate) {
 		adjacent := seats.GetAdjacent(coordinate)
-		newSeatValue := seatChange(coordinate, adjacent)
+		newSeatValue := seatChangePart1(coordinate, adjacent)
 		newSeats.SetCoordinate(newSeatValue)
 	})
 
 	return newSeats
 }
 
-func seatChange(seat util.Coordinate, adjacent []util.Coordinate) util.Coordinate {
+func seatChangePart1(seat util.Coordinate, adjacent []util.Coordinate) util.Coordinate {
 
 	currentValue := fmt.Sprintf("%v", seat.Value)
 	newValue := currentValue
