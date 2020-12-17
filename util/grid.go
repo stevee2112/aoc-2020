@@ -154,7 +154,7 @@ func (g *Grid) Checksum() string {
 
 func (g *Grid) Print() {
 
-	for y := g.MinX; y <= g.MaxY; y++ {
+	for y := g.MinY; y <= g.MaxY; y++ {
 		row := ""
 		for x := g.MinX; x <= g.MaxX; x++ {
 			row += fmt.Sprintf("%v", g.GetValue(x, y))
@@ -166,7 +166,7 @@ func (g *Grid) Print() {
 
 func (g *Grid) PrintWithFill(fill string) {
 
-	for y := g.MinX; y <= g.MaxY; y++ {
+	for y := g.MinY; y <= g.MaxY; y++ {
 		row := ""
 		for x := g.MinX; x <= g.MaxX; x++ {
 			value :=  g.GetValue(x, y)

@@ -71,6 +71,36 @@ func (dg *DirectedGraph) Rotate(direction RelativeDirection, degrees int) *Direc
 	return dg
 }
 
+func (dg *DirectedGraph) RotateAroundPoint(direction RelativeDirection, degrees int, x int, y int) *DirectedGraph {
+
+	rotate := degrees / 90;
+
+	for rotate > 0 {
+		dg.Rotate90AroundPoint(direction, x, y)
+		rotate--
+	}
+
+	return dg
+}
+
+func (dg *DirectedGraph) Rotate90AroundPoint(direction RelativeDirection, x int, y int) *DirectedGraph {
+	// take diff
+	xDiff := dg.At.X - x
+	yDiff := dg.At.Y - y
+
+	if direction == Right {
+		// apply diff and move
+		dg.MoveTo(-yDiff + x , xDiff + y)
+	}
+
+	if direction == Left {
+		// apply diff and move
+		dg.MoveTo(yDiff + x , -xDiff + y)
+	}
+
+	return dg
+}
+
 func (dg *DirectedGraph) Move(direction interface{}) *DirectedGraph {
 	return dg.MoveBy(direction, 1)
 }
@@ -99,6 +129,15 @@ func (dg *DirectedGraph) MoveBy(givenDirection interface{}, length int) *Directe
 	}
 
 	dg.SetCoordinate(dg.At)
+
+	return dg
+}
+
+func (dg *DirectedGraph) MoveTo(x int, y int) *DirectedGraph {
+
+	dg.Map.DeleteValue(dg.At.X, dg.At.Y)
+	dg.At.X = x
+	dg.At.Y = y
 
 	return dg
 }
