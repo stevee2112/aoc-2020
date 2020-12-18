@@ -30,3 +30,14 @@ func Abs(x int) int {
 	}
 	return x
 }
+
+func Max(ints []int) int {
+	max := -999999999999
+	for _, a := range ints {
+		if a > max {
+			max = a
+		}
+	}
+
+	return max
+}
