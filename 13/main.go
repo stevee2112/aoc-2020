@@ -55,13 +55,10 @@ func getSoonestSequence(startTimestamp int, buses []int) int {
 
 	for !inSequence {
 
-		fmt.Println(timestamp)
-
 		inSequence = true
 		if timestamp % buses[0] != 0 {
 			inSequence = false
 			timestamp += 2077047947
-			fmt.Println(timestamp)
 			continue
 		}
 
@@ -78,7 +75,6 @@ func getSoonestSequence(startTimestamp int, buses []int) int {
 				break
 			}
 
-			fmt.Println("good", bus)
 			next++
 		}
 
