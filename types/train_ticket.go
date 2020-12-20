@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 )
 
 type TicketFieldRule struct {
@@ -38,6 +39,7 @@ type TicketRules struct {
 }
 
 type TicketField struct {
+	Name string
 	Value int
 	RulesMatched []TicketFieldRule
 }
@@ -51,10 +53,17 @@ func NewTicket(values []int) Ticket {
 	ticket := Ticket{}
 
 	for _,value := range values {
-		ticket.Fields = append(ticket.Fields, TicketField{value, []TicketFieldRule{}})
+		ticket.Fields = append(ticket.Fields, TicketField{"?????", value, []TicketFieldRule{}})
 	}
 
 	return ticket
+}
+
+func (t *Ticket) Print() {
+
+	for _,field := range t.Fields {
+		fmt.Println(field.Name, ":", field.Value)
+	}
 }
 
 func (t *Ticket) MatchFieldsToRules(rules TicketRules) {
