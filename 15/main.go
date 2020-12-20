@@ -29,16 +29,23 @@ func main() {
 
 	scanner.Scan()
 	numbers := strings.Split(scanner.Text(), ",")
-	memory := map[int]Number{}
 
-	lastNumber := 0
+	memoryPart1 := map[int]Number{}
+	lastNumberPart1 := 0
 	for index,value := range numbers {
-		lastNumber, _ = strconv.Atoi(value)
-		memory[lastNumber] = newNumber(index)
+		lastNumberPart1, _ = strconv.Atoi(value)
+		memoryPart1[lastNumberPart1] = newNumber(index)
 	}
 
-	fmt.Printf("Part 1: %d\n", startGame(memory, lastNumber, len(numbers), 2020))
-	fmt.Printf("Part 2: %d\n", 0)
+	memoryPart2 := map[int]Number{}
+	lastNumberPart2 := 0
+	for index,value := range numbers {
+		lastNumberPart2, _ = strconv.Atoi(value)
+		memoryPart2[lastNumberPart2] = newNumber(index)
+	}
+
+	fmt.Printf("Part 1: %d\n", startGame(memoryPart1, lastNumberPart1, len(numbers), 2020))
+	fmt.Printf("Part 2: %d\n", startGame(memoryPart2, lastNumberPart2, len(numbers), 30000000))
 }
 
 func startGame(memory map[int]Number, lastSaid int, at int, stopAt int) int {
