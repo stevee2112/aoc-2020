@@ -136,7 +136,7 @@ func (g *Grid) GetFromSlope(coordinate Coordinate, slopeX int, slopeY int) []Coo
 }
 
 func (g *Grid) Iterate(callback func (coordinate Coordinate)) {
-	for y := g.MinX; y <= g.MaxY; y++ {
+	for y := g.MinY; y <= g.MaxY; y++ {
 		for x := g.MinX; x <= g.MaxX; x++ {
 			callback(g.GetCoordinate(x, y))
 		}
