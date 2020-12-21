@@ -16,7 +16,7 @@ func main() {
 	// Get Data
 	_, file, _,  _ := runtime.Caller(0)
 
-	input, _ := os.Open(path.Dir(file) + "/example")
+	input, _ := os.Open(path.Dir(file) + "/input")
 
 	defer input.Close()
 	scanner := bufio.NewScanner(input)
@@ -33,7 +33,10 @@ func main() {
 	fmt.Printf("Part 2: %d\n", totalSum2)
 }
 
-func evaluate2(inputs []string) int {
+func evaluate2(originalInputs []string) int {
+
+	inputs := make([]string, len(originalInputs))
+	copy(inputs, originalInputs)
 
 	if len(inputs) == 1 {
 		num, _ := strconv.Atoi(inputs[0])
@@ -66,7 +69,7 @@ func evaluate2(inputs []string) int {
 				at++
 			}
 
-			newInput := append(inputs[:startAt - 1], strconv.Itoa(evaluate(inputs[startAt:endAt])))
+			newInput := append(inputs[:startAt - 1], strconv.Itoa(evaluate2(inputs[startAt:endAt])))
 			newInput = append(newInput, inputs[endAt + 1:]...)
 
 			inputs = newInput
@@ -74,8 +77,32 @@ func evaluate2(inputs []string) int {
 		}
 	}
 
-	at = 1
 	currentValue,_ :=  strconv.Atoi(inputs[0])
+    at = 0
+    for at < len(inputs) {
+		input := inputs[at]
+		at++
+
+		_, err := strconv.Atoi(input)
+		if err != nil {
+			if input == "+" {
+				left,_ := strconv.Atoi(inputs[at - 2])
+				right,_ := strconv.Atoi(inputs[at])
+				newInput := append(inputs[:at - 2], strconv.Itoa((left + right)))
+				newInput = append(newInput, inputs[at + 1:]...)
+
+				// Reset
+				inputs = newInput
+				at = 0
+				currentValue,_ =  strconv.Atoi(inputs[0])
+
+			}
+		}
+
+	}
+
+	at = 1
+	currentValue,_ =  strconv.Atoi(inputs[0])
 	nextAction := ""
 	for _,input := range inputs[at:] {
 
@@ -97,7 +124,10 @@ func evaluate2(inputs []string) int {
 	return currentValue
 }
 
-func evaluate(inputs []string) int {
+func evaluate(originalInputs []string) int {
+
+	inputs := make([]string, len(originalInputs))
+	copy(inputs, originalInputs)
 
 	if len(inputs) == 1 {
 		num, _ := strconv.Atoi(inputs[0])
