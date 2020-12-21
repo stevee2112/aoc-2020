@@ -24,3 +24,15 @@ type Coordinate3d struct {
 func (c *Coordinate3d) String() string {
 	return fmt.Sprintf("%d,%d,%d", c.X, c.Y, c.Z)
 }
+
+type Coordinate4d struct {
+	X int
+	Y int
+	Z int
+	W int
+	Value interface{}
+}
+
+func (c *Coordinate4d) String() string {
+	return fmt.Sprintf("%d,%d,%d,%d", c.X, c.Y, c.Z, c.W)
+}
