@@ -4,15 +4,19 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"crypto/md5"
 )
+
 
 type MessageRules struct {
 	rules map[int]MessageRule
+	ruleSetCache map[string]map[string]bool
 }
 
 func NewMessageRules() MessageRules {
 	return MessageRules{
 		map[int]MessageRule{},
+		map[string]map[string]bool{},
 	}
 }
 
@@ -27,10 +31,15 @@ func (mr *MessageRules) Evaluate(id int) map[string]bool {
 func (mr *MessageRules) getEvaluatedMatches(id int) map[string]bool {
 	rule := mr.rules[id]
 	ruleSet := rule.rule
-	return mr.EvaluatRuleSet(ruleSet)
+	return copyMatches(mr.EvaluatRuleSet(ruleSet))
 }
 
-func (mr *MessageRules) EvaluatRuleSet(ruleSet []string ) map[string]bool {
+func (mr *MessageRules) EvaluatRuleSet(ruleSet []string) map[string]bool {
+
+
+	if cacheVal, ok := mr.ruleSetCache[checksum(ruleSet)]; ok {
+		return cacheVal
+	}
 
 	matches := map[string]bool{}
 
@@ -46,6 +55,7 @@ func (mr *MessageRules) EvaluatRuleSet(ruleSet []string ) map[string]bool {
 			}
 		}
 
+		mr.ruleSetCache[checksum(ruleSet)] = copyMatches(matches)
 		return matches
 	}
 
@@ -86,8 +96,8 @@ func (mr *MessageRules) EvaluatRuleSet(ruleSet []string ) map[string]bool {
 		subRuleSets := strings.Split(strings.Join(ruleSet, " "), "|")
 
 		subMatches := map[string]bool{}
-		for _, ruleSet := range subRuleSets {
-			newMatches := mr.EvaluatRuleSet(strings.Split(ruleSet, " "))
+		for _, newRuleSet := range subRuleSets {
+			newMatches := mr.EvaluatRuleSet(strings.Split(strings.TrimSpace(newRuleSet), " "))
 
 			for match,_ := range newMatches {
 				subMatches[match] = true
@@ -109,6 +119,7 @@ func (mr *MessageRules) EvaluatRuleSet(ruleSet []string ) map[string]bool {
 		}
 	}
 
+	//mr.ruleSetCache[checksum(ruleSet)] = copyMatches(matches)
 	return matches
 }
 
@@ -129,4 +140,8 @@ func copyMatches(originalMatches  map[string]bool) map[string]bool {
 	}
 
 	return newMatches
+}
+
+func checksum(ruleSet []string) string {
+	return fmt.Sprintf("%x", md5.Sum([]byte(strings.Join(ruleSet, ""))))
 }
