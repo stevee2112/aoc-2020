@@ -61,7 +61,7 @@ func main() {
 		}
 	}
 	// Part 2
-	// 42 repeating then ending with 31 repeating
+	// at least 1 42 repeating then ending with 31 repeating, 31 have to be less than the number of 42
 	part2Matching := 0
 	_, windowSize := getSize(rule42)
 	_, rule31Size := getSize(rule31)
