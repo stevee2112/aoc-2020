@@ -172,6 +172,40 @@ func (g *Grid) Rotate90() {
 	g.grid = rotated
 }
 
+func (g *Grid) FlipHorizontal() {
+	g.grid = g.NewFlipHorizontal().grid
+}
+
+func (g *Grid) FlipVertical() {
+	g.grid = g.NewFlipVertical().grid
+}
+
+func (g *Grid) NewFlipHorizontal() Grid {
+	flipped := Grid{}
+    for y := g.MinY; y <= g.MaxY; y++ {
+        for x := g.MinX; x <= g.MaxX; x++ {
+			coordinate := g.GetCoordinate(x, y)
+			newCoordinate := Coordinate{g.MaxX - coordinate.X, y, coordinate.Value}
+			flipped.SetCoordinate(newCoordinate)
+        }
+    }
+
+	return flipped
+}
+
+func (g *Grid) NewFlipVertical() Grid {
+	flipped := Grid{}
+    for y := g.MinY; y <= g.MaxY; y++ {
+        for x := g.MinX; x <= g.MaxX; x++ {
+			coordinate := g.GetCoordinate(x, y)
+			newCoordinate := Coordinate{x, g.MaxY - coordinate.Y, coordinate.Value}
+			flipped.SetCoordinate(newCoordinate)
+        }
+    }
+
+	return flipped
+}
+
 func (g *Grid) Checksum() string {
 	checksum := ""
 	g.Iterate(func(coordinate Coordinate) {
@@ -209,4 +243,10 @@ func (g *Grid) PrintWithFill(fill string) {
 
 		fmt.Println(row)
 	}
+}
+
+func (g *Grid) AddGrid(x int, y int, grid Grid) {
+	grid.Iterate(func (coordinate Coordinate) {
+		g.SetValue(x + coordinate.X, y + coordinate.Y, coordinate.Value)
+	});
 }
