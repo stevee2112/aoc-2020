@@ -143,6 +143,35 @@ func (g *Grid) Iterate(callback func (coordinate Coordinate)) {
 	}
 }
 
+func (g *Grid) GetRow(y int) Grid {
+	row := Grid{}
+	for x := g.MinX; x <= g.MaxX; x++ {
+		row.SetValue(x,0, g.GetValue(x, y))
+	}
+
+	return row
+}
+
+func (g *Grid) GetCol(x int) Grid {
+	row := Grid{}
+	for y := g.MinY; y <= g.MaxY; y++ {
+		row.SetValue(0,y, g.GetValue(x, y))
+	}
+
+	return row
+}
+
+func (g *Grid) Rotate90() {
+	rotated := map[string]Coordinate{}
+
+	g.Iterate(func (coordinate Coordinate) {
+		newCoordinate := Coordinate{g.MaxY - coordinate.Y, coordinate.X, coordinate.Value}
+		rotated[newCoordinate.String()] = newCoordinate
+	});
+
+	g.grid = rotated
+}
+
 func (g *Grid) Checksum() string {
 	checksum := ""
 	g.Iterate(func(coordinate Coordinate) {
