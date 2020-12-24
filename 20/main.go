@@ -17,7 +17,7 @@ func main() {
 	// Get Data
 	_, file, _,  _ := runtime.Caller(0)
 
-	input, _ := os.Open(path.Dir(file) + "/input")
+	input, _ := os.Open(path.Dir(file) + "/example")
 
 	defer input.Close()
 	scanner := bufio.NewScanner(input)
@@ -44,7 +44,7 @@ func main() {
 		}
 
 		chars := strings.Split(inputStr, "")
-
+ 
 		for x, char := range chars {
 			tile.Grid.SetValue(x, y, char)
 		}
@@ -52,26 +52,37 @@ func main() {
 		y++
 	}
 
-	// Add last tile
-	tiles = append(tiles, tile)
+	// TODO implement flip func(s) horizontal and vertical probably
+	// To connected tiles in proper form
+	// then start with a tile and build out from there ending when ALL tiles have been connected
+	// connected being, getConnected was called for them
+	// this can be done by keeping a map.  and ending when the map size equals the size of all tiles
+	// at that point we should have everything we need to build the real image
 
+	blah := getConnected(tiles[2], tiles) // 1171
+	blah2 := getConnected(blah[0], tiles) // 2473
 
-	sum := 1
-	for _,tile := range tiles {
-		connected := len(getConnected(tile, tiles))
-		if connected == 2 {
-			fmt.Println("2")
-			sum *= tile.Id
-		}
+	for _,connected := range blah2 {
+		fmt.Println("\n")
+		connected.Grid.Print()
 	}
 
-	fmt.Printf("Part 1: %d\n", sum)
-	// tile = tiles[5]
+	// sum := 1
+	// tileConnections := map[int][]Tile{}
+	// for _,tile := range tiles {
+	// 	connected := getConnected(tile, tiles)
+	// 	tileConnections[tile.Id] = connected
+	// 	if len(connected) == 2 {
+	// 		sum *= tile.Id
+	// 	}
+	// 	count++
+	// }
 
-	// tile.Grid.Print()
-	// tile.Grid.Rotate90()
-	// fmt.Println("\n")
-	// tile.Grid.Print()
+	// for id, connections := range tileConnections {
+	// 	fmt.Println(id, len(connections)
+	// }
+
+	//fmt.Printf("Part 1: %d\n", sum)
 }
 
 func getConnected(tile Tile, tiles []Tile) []Tile {
@@ -79,6 +90,7 @@ func getConnected(tile Tile, tiles []Tile) []Tile {
 	connected := []Tile{}
 
 
+	fmt.Println(tile.Id)
 	// Top
 	topRow := tile.Grid.GetRow(0)
 	for _,checkTile := range tiles {
@@ -91,10 +103,14 @@ func getConnected(tile Tile, tiles []Tile) []Tile {
 		for rotations > 0 {
 			bottomRow := checkTile.Grid.GetRow(checkTile.Grid.MaxY)
 			flipped := Flip(bottomRow)
-			if bottomRow.Checksum() == topRow.Checksum() ||
-			    topRow.Checksum() == flipped.Checksum() {
+			if bottomRow.Checksum() == topRow.Checksum() {
 				connected = append(connected, checkTile)
-				//fmt.Println("TOP MATCH", checkTile.Id)
+				fmt.Println("TOP MATCH", checkTile.Id, rotations)
+			}
+
+			if topRow.Checksum() == flipped.Checksum() {
+				connected = append(connected, checkTile)
+				fmt.Println("TOP MATCH", checkTile.Id, rotations, "FLIPPED")
 			}
 
 			checkTile.Grid.Rotate90()
@@ -114,11 +130,16 @@ func getConnected(tile Tile, tiles []Tile) []Tile {
 		for rotations > 0 {
 			leftCol := checkTile.Grid.GetCol(0)
 			flipped := Flip(leftCol)
-			if leftCol.Checksum() == RightCol.Checksum() ||
-				RightCol.Checksum() == flipped.Checksum() {
+			if leftCol.Checksum() == RightCol.Checksum() {
 				connected = append(connected, checkTile)
-				//fmt.Println("RIGHT MATCH", checkTile.Id)
+				fmt.Println("RIGHT", checkTile.Id, rotations)
 			}
+
+			if RightCol.Checksum() == flipped.Checksum() {
+				connected = append(connected, checkTile)
+				fmt.Println("RIGHT", checkTile.Id, rotations, "flipped")
+			}
+
 
 			checkTile.Grid.Rotate90()
 			rotations--
@@ -139,11 +160,17 @@ func getConnected(tile Tile, tiles []Tile) []Tile {
 			flipped := Flip(topRow)
 
 			// since the image can be flipped with should row flipped as well
-			if bottomRow.Checksum() == topRow.Checksum() ||
-				bottomRow.Checksum() == flipped.Checksum() {
+			if bottomRow.Checksum() == topRow.Checksum() {
 				connected = append(connected, checkTile)
-				//fmt.Println("BOTTOM MATCH", checkTile.Id)
+				fmt.Println("BOTTOM", checkTile.Id, rotations)
 			}
+
+
+			if bottomRow.Checksum() == flipped.Checksum() {
+				connected = append(connected, checkTile)
+				fmt.Println("BOTTOM", checkTile.Id, rotations, "flipped")
+			}
+
 
 			checkTile.Grid.Rotate90()
 			rotations--
@@ -162,11 +189,16 @@ func getConnected(tile Tile, tiles []Tile) []Tile {
 		for rotations > 0 {
 			rightCol := checkTile.Grid.GetCol(tile.Grid.MaxX)
 			flipped := Flip(rightCol)
-			if leftCol.Checksum() == rightCol.Checksum() ||
-				leftCol.Checksum() == flipped.Checksum() {
+			if leftCol.Checksum() == rightCol.Checksum() {
 				connected = append(connected, checkTile)
-				//fmt.Println("LEFT MATCH", checkTile.Id)
+				fmt.Println("LEFT", checkTile.Id, rotations)
 			}
+
+			if leftCol.Checksum() == flipped.Checksum() {
+				connected = append(connected, checkTile)
+				fmt.Println("LEFT", checkTile.Id, rotations, "flipped")
+			}
+
 
 			checkTile.Grid.Rotate90()
 			rotations--
