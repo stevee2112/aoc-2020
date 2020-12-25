@@ -23,6 +23,8 @@ func main() {
 	scanner := bufio.NewScanner(input)
 
 	tiles := []Tile{}
+	tileGrid := util.Grid{}
+	tileGridIndex := map[int]util.Coordinate{}
 
 	var tile Tile
 	y := 0;
@@ -58,27 +60,69 @@ func main() {
 	// this can be done by keeping a map.  and ending when the map size equals the size of all tiles
 	// at that point we should have everything we need to build the real image
 
-	testTile := tiles[3]
-	connected := getConnected(testTile, tiles)
+	firstTileCoordinate := util.Coordinate{0, 0, tiles[0]}
+	tileGrid.SetCoordinate(firstTileCoordinate)
+	tileGridIndex[tiles[0].Id] = firstTileCoordinate
 
-	for direction,tile := range connected {
-		fmt.Println(tile.Id, direction)
+	fullGrid := util.Grid{}
+	fullGrid.AddGrid(0, 0, tiles[0].Grid)
+
+	tileSize := 10
+
+	for len(tileGridIndex) < len(tiles) {
+		for _,tileCoordinate := range tileGridIndex {
+
+			testTile := tileCoordinate.Value.(Tile)
+			connected := getConnected(testTile, tiles)
+
+			// TOP
+			//testTile.Grid.AddGrid(0, -(connected["TOP"].Grid.MaxY + 1), connected["TOP"].Grid)
+
+			// RIGHT
+			//testTile.Grid.AddGrid(connected["RIGHT"].Grid.MaxX + 1, 0, connected["RIGHT"].Grid)
+
+			// BOTTOM
+			//testTile.Grid.AddGrid(0, (connected["BOTTOM"].Grid.MaxY + 1), connected["BOTTOM"].Grid)
+
+			// LEFT
+			//testTile.Grid.AddGrid(-(connected["LEFT"].Grid.MaxX + 1), 0, connected["LEFT"].Grid)
+
+			//fmt.Println(testTile.Id, tileCoordinate.X, tileCoordinate.Y)
+			for direction,tile := range connected {
+
+				x := tileCoordinate.X
+				y := tileCoordinate.Y
+				if direction == "TOP" {
+					y--
+				}
+
+				if direction == "RIGHT" {
+					x++
+				}
+
+				if direction == "BOTTOM" {
+					y++
+				}
+
+				if direction == "LEFT" {
+					x--
+				}
+
+				fullGrid.AddGrid(x * tileSize, y * tileSize, connected[direction].Grid)
+				position := util.Coordinate{x,y,tile}
+				tileGridIndex[tile.Id] = position
+				tileGrid.SetCoordinate(position)
+			}
+
+			//testTile.Grid.PrintWithFill(".")
+		}
 	}
 
-	// TOP
-	testTile.Grid.AddGrid(0, -(connected["TOP"].Grid.MaxY + 1), connected["TOP"].Grid)
-
-	// RIGHT
-	testTile.Grid.AddGrid(connected["RIGHT"].Grid.MaxX + 1, 0, connected["RIGHT"].Grid)
-
-	// BOTTOM
-	testTile.Grid.AddGrid(0, (connected["BOTTOM"].Grid.MaxY + 1), connected["BOTTOM"].Grid)
-
-	// LEFT
-	testTile.Grid.AddGrid(-(connected["LEFT"].Grid.MaxX + 1), 0, connected["LEFT"].Grid)
-
-	testTile.Grid.PrintWithFill(".")
-
+	fullGrid.Normalize()
+	fullGrid.FlipHorizontal()
+	fullGrid.Rotate90()
+	fullGrid.Rotate90()
+	fullGrid.Print()
 
 	sum := 1
 	for _,tile := range tiles {

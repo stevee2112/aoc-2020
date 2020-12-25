@@ -172,6 +172,19 @@ func (g *Grid) Rotate90() {
 	g.grid = rotated
 }
 
+func (g *Grid) Normalize() {
+	normalized := Grid{}
+    for y := g.MinY; y <= g.MaxY; y++ {
+        for x := g.MinX; x <= g.MaxX; x++ {
+			coordinate := g.GetCoordinate(x, y)
+			newCoordinate := Coordinate{x - g.MinX, y - g.MinY, coordinate.Value}
+			normalized.SetCoordinate(newCoordinate)
+        }
+    }
+
+	*g = normalized
+}
+
 func (g *Grid) FlipHorizontal() {
 	g.grid = g.NewFlipHorizontal().grid
 }
