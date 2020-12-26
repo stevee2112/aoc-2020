@@ -17,14 +17,12 @@ func main() {
 	// Get Data
 	_, file, _,  _ := runtime.Caller(0)
 
-	input, _ := os.Open(path.Dir(file) + "/example")
+	input, _ := os.Open(path.Dir(file) + "/input")
 
 	defer input.Close()
 	scanner := bufio.NewScanner(input)
 
 	tiles := []Tile{}
-	tileGrid := util.Grid{}
-	tileGridIndex := map[int]util.Coordinate{}
 
 	var tile Tile
 	y := 0;
@@ -54,40 +52,153 @@ func main() {
 		y++
 	}
 
+	// Part 1
+	sum := 1
+	for _,tile := range tiles {
+		connected := getConnected(tile, tiles)
+		if len(connected) == 2 {
+			sum *= tile.Id
+		}
+	}
 
-	// start with a tile and build out from there ending when ALL tiles have been connected
-	// connected being, getConnected was called for them
-	// this can be done by keeping a map.  and ending when the map size equals the size of all tiles
-	// at that point we should have everything we need to build the real image
+	// Part 2
+	fullGrid := buildImage(tiles)
 
+	foundMonster := false
+
+	rotations := 4
+	for rotations > 0 {
+		foundMonster, fullGrid = findMonster(fullGrid)
+
+
+		if foundMonster {
+			break
+		}
+
+		fullGrid.Rotate90()
+
+		rotations--
+	}
+
+	if !foundMonster {
+		fullGrid.FlipVertical()
+
+		rotations = 4
+		for rotations > 0 {
+			foundMonster, fullGrid = findMonster(fullGrid)
+
+
+			if foundMonster {
+				break
+			}
+
+			fullGrid.Rotate90()
+
+			rotations--
+		}
+
+	}
+
+	if !foundMonster {
+		fullGrid.FlipHorizontal()
+
+		rotations = 4
+		for rotations > 0 {
+			foundMonster, fullGrid = findMonster(fullGrid)
+
+
+			if foundMonster {
+				break
+			}
+
+			fullGrid.Rotate90()
+
+			rotations--
+		}
+
+	}
+
+	roughness := 0
+	fullGrid.Iterate(func (c util.Coordinate) {
+		if c.Value == "#" {
+			roughness++
+		}
+	})
+
+	fullGrid.Print()
+	fmt.Printf("Part 1: %d\n", sum)
+	fmt.Printf("Part 2: %d\n", roughness)
+}
+
+func findMonster(image util.Grid) (bool, util.Grid) {
+
+	monsterWidth := 19
+	monsterHeight := 2
+	hasMonster := false
+
+	image.Iterate(func (coordinate util.Coordinate) {
+		x := coordinate.X
+		y := coordinate.Y
+
+		subImage := image.Subset(x,y, x + monsterWidth, y + monsterHeight)
+		check, imageWithMonster := checkForMonster(subImage)
+		if check {
+			hasMonster = true
+			image.AddGrid(x, y, imageWithMonster)
+		}
+	})
+	return hasMonster, image
+}
+
+func checkForMonster(image util.Grid) (bool, util.Grid) {
+
+	mustMatch := []util.Coordinate{
+		util.Coordinate{18,0,"#"},
+		util.Coordinate{0,1,"#"},
+		util.Coordinate{5,1,"#"},
+		util.Coordinate{6,1,"#"},
+		util.Coordinate{11,1,"#"},
+		util.Coordinate{12,1,"#"},
+		util.Coordinate{17,1,"#"},
+		util.Coordinate{18,1,"#"},
+		util.Coordinate{19,1,"#"},
+		util.Coordinate{1,2,"#"},
+		util.Coordinate{4,2,"#"},
+		util.Coordinate{7,2,"#"},
+		util.Coordinate{10,2,"#"},
+		util.Coordinate{13,2,"#"},
+		util.Coordinate{16,2,"#"},
+	}
+
+	for _,match := range mustMatch {
+		if image.GetValue(match.X, match.Y) != match.Value {
+			return false, image
+		} else {
+			image.SetValue(match.X, match.Y, "O")
+		}
+	}
+	return true, image
+}
+
+func buildImage(tiles []Tile) util.Grid {
+
+	tileGrid := util.Grid{}
+	tileGridIndex := map[int]util.Coordinate{}
 	firstTileCoordinate := util.Coordinate{0, 0, tiles[0]}
 	tileGrid.SetCoordinate(firstTileCoordinate)
 	tileGridIndex[tiles[0].Id] = firstTileCoordinate
 
-	fullGrid := util.Grid{}
-	fullGrid.AddGrid(0, 0, tiles[0].Grid)
 
-	tileSize := 10
+	fullGrid := util.Grid{}
+	fullGrid.AddGrid(0, 0, tiles[0].Grid.Subset(1,1,8,8))
+
+	tileSize := 8
 
 	for len(tileGridIndex) < len(tiles) {
 		for _,tileCoordinate := range tileGridIndex {
-
 			testTile := tileCoordinate.Value.(Tile)
 			connected := getConnected(testTile, tiles)
 
-			// TOP
-			//testTile.Grid.AddGrid(0, -(connected["TOP"].Grid.MaxY + 1), connected["TOP"].Grid)
-
-			// RIGHT
-			//testTile.Grid.AddGrid(connected["RIGHT"].Grid.MaxX + 1, 0, connected["RIGHT"].Grid)
-
-			// BOTTOM
-			//testTile.Grid.AddGrid(0, (connected["BOTTOM"].Grid.MaxY + 1), connected["BOTTOM"].Grid)
-
-			// LEFT
-			//testTile.Grid.AddGrid(-(connected["LEFT"].Grid.MaxX + 1), 0, connected["LEFT"].Grid)
-
-			//fmt.Println(testTile.Id, tileCoordinate.X, tileCoordinate.Y)
 			for direction,tile := range connected {
 
 				x := tileCoordinate.X
@@ -108,31 +219,17 @@ func main() {
 					x--
 				}
 
-				fullGrid.AddGrid(x * tileSize, y * tileSize, connected[direction].Grid)
+				subGrid := connected[direction].Grid
+				fullGrid.AddGrid(x * tileSize, y * tileSize, subGrid.Subset(1,1,8,8))
 				position := util.Coordinate{x,y,tile}
 				tileGridIndex[tile.Id] = position
 				tileGrid.SetCoordinate(position)
 			}
-
-			//testTile.Grid.PrintWithFill(".")
 		}
 	}
 
 	fullGrid.Normalize()
-	fullGrid.FlipHorizontal()
-	fullGrid.Rotate90()
-	fullGrid.Rotate90()
-	fullGrid.Print()
-
-	sum := 1
-	for _,tile := range tiles {
-		connected := getConnected(tile, tiles)
-		if len(connected) == 2 {
-			sum *= tile.Id
-		}
-	}
-
-	fmt.Printf("Part 1: %d\n", sum)
+	return fullGrid
 }
 
 func getConnected(tile Tile, tiles []Tile) map[string]Tile {
@@ -152,12 +249,10 @@ func getConnected(tile Tile, tiles []Tile) map[string]Tile {
 			flipped := Flip(bottomRow)
 			if bottomRow.Checksum() == topRow.Checksum() {
 				connected["TOP"]= checkTile
-				//fmt.Println("TOP MATCH", checkTile.Id, rotations)
 			}
 
 			if topRow.Checksum() == flipped.Checksum() {
 				connected["TOP"]= Tile{checkTile.Id, checkTile.Grid.NewFlipHorizontal()}
-				//fmt.Println("TOP MATCH", checkTile.Id, rotations, "FLIPPED")
 			}
 
 			checkTile.Grid.Rotate90()
@@ -179,12 +274,10 @@ func getConnected(tile Tile, tiles []Tile) map[string]Tile {
 			flipped := Flip(leftCol)
 			if leftCol.Checksum() == RightCol.Checksum() {
 				connected["RIGHT"]= checkTile
-				//fmt.Println("RIGHT", checkTile.Id, rotations)
 			}
 
 			if RightCol.Checksum() == flipped.Checksum() {
 				connected["RIGHT"] = Tile{checkTile.Id, checkTile.Grid.NewFlipVertical()}
-				//fmt.Println("RIGHT", checkTile.Id, rotations, "flipped")
 			}
 
 
@@ -209,12 +302,10 @@ func getConnected(tile Tile, tiles []Tile) map[string]Tile {
 			// since the image can be flipped with should row flipped as well
 			if bottomRow.Checksum() == topRow.Checksum() {
 				connected["BOTTOM"] = checkTile
-				//fmt.Println("BOTTOM", checkTile.Id, rotations)
 			}
 
 			if bottomRow.Checksum() == flipped.Checksum() {
 				connected["BOTTOM"] = Tile{checkTile.Id, checkTile.Grid.NewFlipHorizontal()}
-				//fmt.Println("BOTTOM", checkTile.Id, rotations, "flipped")
 			}
 
 
@@ -237,12 +328,10 @@ func getConnected(tile Tile, tiles []Tile) map[string]Tile {
 			flipped := Flip(rightCol)
 			if leftCol.Checksum() == rightCol.Checksum() {
 				connected["LEFT"] = checkTile
-				//fmt.Println("LEFT", checkTile.Id, rotations)
 			}
 
 			if leftCol.Checksum() == flipped.Checksum() {
 				connected["LEFT"] = Tile{checkTile.Id, checkTile.Grid.NewFlipVertical()}
-				//fmt.Println("LEFT", checkTile.Id, rotations, "flipped")
 			}
 
 

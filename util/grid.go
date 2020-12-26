@@ -185,6 +185,19 @@ func (g *Grid) Normalize() {
 	*g = normalized
 }
 
+func (g *Grid) Subset(topX int, topY int, bottomX int, bottomY int) Grid {
+	subset := Grid{}
+    for y := topY; y <= bottomY; y++ {
+        for x := topX; x <= bottomX; x++ {
+			coordinate := g.GetCoordinate(x, y)
+			newCoordinate := Coordinate{x - topX, y - topY, coordinate.Value}
+			subset.SetCoordinate(newCoordinate)
+        }
+    }
+
+	return subset
+}
+
 func (g *Grid) FlipHorizontal() {
 	g.grid = g.NewFlipHorizontal().grid
 }
