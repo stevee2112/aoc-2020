@@ -57,7 +57,6 @@ func main() {
 		if p2CardsPart1.Len() == 0 {
 			winnerPart1 = p1CardsPart1
 		}
-
 	}
 
 	fmt.Printf("Part 1: %d\n", Score(winnerPart1))
