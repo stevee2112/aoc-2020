@@ -1,7 +1,6 @@
 package main
 
 import (
-	//"stevee2112/aoc-2020/types"
 	"fmt"
 	"os"
 	"runtime"
@@ -9,8 +8,7 @@ import (
 	"bufio"
 	"regexp"
 	"strings"
-	//"strconv"
-	//	"regexp"
+	"sort"
 )
 
 func main() {
@@ -18,7 +16,7 @@ func main() {
 	// Get Data
 	_, file, _,  _ := runtime.Caller(0)
 
-	input, _ := os.Open(path.Dir(file) + "/example")
+	input, _ := os.Open(path.Dir(file) + "/input")
 
 	defer input.Close()
 	scanner := bufio.NewScanner(input)
@@ -78,14 +76,72 @@ func main() {
 	// Part 1
 	sum := 0
 	for i, possibleAllergens := range ingredientIndex {
-		fmt.Println(i, possibleAllergens)
 		if len(possibleAllergens) == 0 {
 			sum += ingredientFoodCounter[i]
 		}
 	}
 
+	// Part 2
+	// reduce
+	for needToReduce(ingredientIndex) {
+		for i, possibleAllergens := range ingredientIndex {
+			if len(possibleAllergens) == 1 {
+				for a, _ := range possibleAllergens {
+					ingredientIndex = reduce(i, a, ingredientIndex)
+				}
+			}
+		}
+	}
+
+	finalAllergens := map[string]string{}
+	for i, possibleAllergens := range ingredientIndex {
+		if len(possibleAllergens) == 1 {
+			for a, _ := range possibleAllergens {
+				finalAllergens[a] = i
+			}
+		}
+	}
+
+	dangerIngredients := []string{}
+	keys := make([]string, 0, len(finalAllergens))
+
+	for k := range finalAllergens {
+		keys = append(keys, k)
+	}
+
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		dangerIngredients = append(dangerIngredients, finalAllergens[k])
+	}
+
+
 	fmt.Printf("Part 1: %d\n", sum)
-	fmt.Printf("Part 2: %d\n", 0)
+	fmt.Printf("Part 2: %s\n", strings.Join(dangerIngredients, ","))
+}
+
+func needToReduce(ingredientIndex map[string]map[string]bool) bool {
+	for _, possibleAllergens := range ingredientIndex {
+		if len(possibleAllergens) > 1 {
+			return true
+		}
+	}
+
+	return false
+}
+
+func reduce(ingredient string, allergen string, ingredientIndex map[string]map[string]bool) map[string]map[string]bool {
+	for i, _ := range ingredientIndex {
+		if i == ingredient {
+			continue
+		}
+
+		if _,ok := ingredientIndex[i][allergen]; ok {
+			delete(ingredientIndex[i], allergen)
+		}
+	}
+
+	return ingredientIndex
 }
 
 func possibleAllergen(ingredient string, allergen string, foods []map[string]bool) bool {
