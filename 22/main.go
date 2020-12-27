@@ -22,17 +22,17 @@ func main() {
 	defer input.Close()
 	scanner := bufio.NewScanner(input)
 
-	p1Cards := list.New()
-	p2Cards := list.New()
+	p1CardsPart1 := list.New()
+	p2CardsPart1 := list.New()
 
-	var currentPlayer *list.List
-	currentPlayer = p1Cards
+	var currentPlayerPart1 *list.List
+	currentPlayerPart1 = p1CardsPart1
 
 	for scanner.Scan() {
 		inputStr := scanner.Text()
 
 		if inputStr == "" {
-			currentPlayer = p2Cards
+			currentPlayerPart1 = p2CardsPart1
 		}
 
 		card, err := strconv.Atoi(inputStr)
@@ -41,29 +41,30 @@ func main() {
 			continue
 		}
 
-		currentPlayer.PushBack(card)
+		currentPlayerPart1.PushBack(card)
 	}
 
 
-	var winner *list.List
-	for p1Cards.Len() > 0 && p2Cards.Len() > 0 {
-		PlayHand(p1Cards, p2Cards)
+	// Part 1
+	var winnerPart1 *list.List
+	for p1CardsPart1.Len() > 0 && p2CardsPart1.Len() > 0 {
+		PlayHandPart1(p1CardsPart1, p2CardsPart1)
 
-		if p1Cards.Len() == 0 {
-			winner = p2Cards
+		if p1CardsPart1.Len() == 0 {
+			winnerPart1 = p2CardsPart1
 		}
 
-		if p2Cards.Len() == 0 {
-			winner = p1Cards
+		if p2CardsPart1.Len() == 0 {
+			winnerPart1 = p1CardsPart1
 		}
 
 	}
 
-	fmt.Printf("Part 1: %d\n", Score(winner))
+	fmt.Printf("Part 1: %d\n", Score(winnerPart1))
 	fmt.Printf("Part 2: %d\n", 0)
 }
 
-func PlayHand(p1Cards *list.List, p2Cards *list.List) {
+func PlayHandPart1(p1Cards *list.List, p2Cards *list.List) {
 	p1Card := GetCard(p1Cards)
 	p2Card := GetCard(p2Cards)
 
