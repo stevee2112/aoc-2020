@@ -26,7 +26,7 @@ func main() {
 	inputStr := strings.Split(scanner.Text(), "")
 
 	count := 0
-	fillSize := len(inputStr)
+	fillSize := 1000000
 
 	cups := ring.New(fillSize)
 	cupsInt := []int{}
@@ -46,19 +46,23 @@ func main() {
 		count++
 	}
 
-	Print("0", cups)
-	moves := 10
+	//Print("0", cups)
+	moves := 10000000
+	fmt.Println(moves)
 	for at :=1; at <= moves;at++ {
+		fmt.Println(float64(at) / float64(moves) * 100)
 		cups = Move(cups)
 		//moved := MoveRingTo(1, Clone(cups))
-		Print(strconv.Itoa(at), cups)
-		fmt.Println(strconv.Itoa(at), predict(cupsInt, at, fillSize))
+		//Print(strconv.Itoa(at), cups)
+		//fmt.Println(strconv.Itoa(at), predict(cupsInt, at, fillSize))
 		//fmt.Println(strconv.Itoa(at), moved.Next().Value)
 	}
 
 	cups = MoveRingTo(1, cups)
 
-	fmt.Printf("Part 1: %s\n", String(cups.Unlink(GetMaxValue(cups) - 1)))
+	fmt.Println(cups.Value, cups.Next().Value, cups.Next().Next().Value)
+
+	//fmt.Printf("Part 1: %s\n", String(cups.Unlink(GetMaxValue(cups) - 1)))
 	fmt.Printf("Part 2: %d\n", 0)
 }
 
@@ -78,7 +82,7 @@ func predict(set []int, iteration int, size int) []int {
 
 func Move(cups *ring.Ring) *ring.Ring{
 
-	removeCount := 1
+	removeCount := 3
 	maxValue := GetMaxValue(cups)
 
 	// Current value
@@ -117,7 +121,7 @@ func GetDestination(current int, removed *ring.Ring, maxValue int) int {
 
 	// if value is in removed try again
     removed.Do(func(p interface{}) {
-        if p.(int) == current {
+        if p.(int) == current {	
 			isRemoved = true
         }
     })
