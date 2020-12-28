@@ -17,7 +17,7 @@ func main() {
 	// Get Data
 	_, file, _,  _ := runtime.Caller(0)
 
-	input, _ := os.Open(path.Dir(file) + "/input")
+	input, _ := os.Open(path.Dir(file) + "/example")
 
 	defer input.Close()
 	scanner := bufio.NewScanner(input)
@@ -25,18 +25,35 @@ func main() {
 	scanner.Scan()
 	inputStr := strings.Split(scanner.Text(), "")
 
-	cups := ring.New(len(inputStr))
+	count := 0
+	fillSize := len(inputStr)
+
+	cups := ring.New(fillSize)
+	cupsInt := []int{}
 
 	for _,s := range inputStr {
 		cup, _ := strconv.Atoi(s)
 		cups.Value = cup
 		cups = cups.Next()
+		cupsInt = append(cupsInt, cup)
+		count++
 	}
 
-	moves := 100
-	for moves > 0 {
+	for at := 10; count < fillSize; at++ {
+		cups.Value = at
+		cups = cups.Next()
+		cupsInt = append(cupsInt, at)
+		count++
+	}
+
+	Print("0", cups)
+	moves := 10
+	for at :=1; at <= moves;at++ {
 		cups = Move(cups)
-		moves--
+		//moved := MoveRingTo(1, Clone(cups))
+		Print(strconv.Itoa(at), cups)
+		fmt.Println(strconv.Itoa(at), predict(cupsInt, at, fillSize))
+		//fmt.Println(strconv.Itoa(at), moved.Next().Value)
 	}
 
 	cups = MoveRingTo(1, cups)
@@ -45,15 +62,30 @@ func main() {
 	fmt.Printf("Part 2: %d\n", 0)
 }
 
+func predict(set []int, iteration int, size int) []int {
+
+	// (at - 1) - (iteration - 1) mod size
+	values := make([]int, size)
+
+    for position,value := range set {
+		at := mod((position - 1 - (iteration - 1)), size)
+		fmt.Println(at)
+		values[at] = value
+    }
+
+	return values
+}
+
 func Move(cups *ring.Ring) *ring.Ring{
 
+	removeCount := 1
 	maxValue := GetMaxValue(cups)
 
 	// Current value
 	current := cups.Value.(int)
 
-	// remove 3
-	removed := cups.Unlink(3)
+	// remove
+	removed := cups.Unlink(removeCount)
 	destination := GetDestination(current, removed, maxValue)
 
 	//move to desination
@@ -136,4 +168,19 @@ func MoveRingTo(value int, cups *ring.Ring) *ring.Ring {
     }
 
 	return cups
+}
+
+func Clone(cups *ring.Ring) *ring.Ring {
+	newCups := ring.New(cups.Len())
+	cups.Do(func(p interface{}) {
+		newCups.Value = p.(int)
+		newCups = newCups.Next()
+
+	})
+
+	return newCups
+}
+
+func mod(a, b int) int {
+    return (a % b + b) % b
 }
