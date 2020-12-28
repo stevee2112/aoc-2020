@@ -17,7 +17,7 @@ func main() {
 	// Get Data
 	_, file, _,  _ := runtime.Caller(0)
 
-	input, _ := os.Open(path.Dir(file) + "/example")
+	input, _ := os.Open(path.Dir(file) + "/input")
 
 	defer input.Close()
 	scanner := bufio.NewScanner(input)
@@ -33,35 +33,28 @@ func main() {
 		cups = cups.Next()
 	}
 
-	moves := 2
+	moves := 100
 	for moves > 0 {
-		Print("cups:", cups)
 		cups = Move(cups)
-		Print("cups after move:", cups)
-		fmt.Println("------")
 		moves--
 	}
 
-	fmt.Printf("Part 1: %d\n", 0)
+	cups = MoveRingTo(1, cups)
+
+	fmt.Printf("Part 1: %s\n", String(cups.Unlink(GetMaxValue(cups) - 1)))
 	fmt.Printf("Part 2: %d\n", 0)
 }
 
 func Move(cups *ring.Ring) *ring.Ring{
 
+	maxValue := GetMaxValue(cups)
+
 	// Current value
 	current := cups.Value.(int)
-	fmt.Println("current", current)
 
 	// remove 3
 	removed := cups.Unlink(3)
-	Print("pick up:", removed)
-	destination := current - 1
-	// Check if part of what we just picked up
-	// TODO this should be its own function and also handle if it drop below zero
-	// GetDestination(current, removed, MAX VALUE OF CUPS)
-
-	fmt.Println("destination", destination)
-	//TODO handle if below zero etc
+	destination := GetDestination(current, removed, maxValue)
 
 	//move to desination
 	for cups.Value.(int) != destination {
@@ -79,10 +72,39 @@ func Move(cups *ring.Ring) *ring.Ring{
 	// Finally move current forward 1
 	cups = cups.Move(1)
 
-
-	fmt.Println("final destination", cups.Value)
-
 	return cups
+}
+
+func GetDestination(current int, removed *ring.Ring, maxValue int) int {
+	current = current - 1
+	isRemoved := false
+
+	if current == 0 {
+		current = maxValue
+	}
+
+	// if value is in removed try again
+    removed.Do(func(p interface{}) {
+        if p.(int) == current {
+			isRemoved = true
+        }
+    })
+
+	if isRemoved {
+		current = GetDestination(current, removed, maxValue)
+	}
+
+	return current
+}
+
+func String(cups *ring.Ring) string {
+	ring := []string{}
+	// Iterate through the combined ring and print its contents
+	cups.Do(func(p interface{}) {
+		ring = append(ring, strconv.Itoa((p.(int))))
+	})
+
+	return strings.Join(ring, "")
 }
 
 func Print(label string, cups *ring.Ring) {
@@ -93,4 +115,25 @@ func Print(label string, cups *ring.Ring) {
 	})
 
 	fmt.Println(label, strings.Join(ring, ", "))
+}
+
+func GetMaxValue(cups *ring.Ring) int {
+
+	maxValue := 0
+	cups.Do(func(p interface{}) {
+		if p.(int) > maxValue {
+			maxValue = p.(int)
+		}
+	})
+
+	return maxValue
+}
+
+func MoveRingTo(value int, cups *ring.Ring) *ring.Ring {
+
+    for cups.Value.(int) != value {
+        cups = cups.Move(1)
+    }
+
+	return cups
 }
