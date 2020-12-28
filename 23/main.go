@@ -69,7 +69,7 @@ func predict(set []int, iteration int, size int) []int {
 
     for position,value := range set {
 		at := mod((position - 1 - (iteration - 1)), size)
-		fmt.Println(at)
+		fmt.Println(mod(position, 2)) // start here skip + 1 and see if we cant figure anything out
 		values[at] = value
     }
 
