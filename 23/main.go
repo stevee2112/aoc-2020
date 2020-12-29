@@ -17,7 +17,7 @@ func main() {
 	// Get Data
 	_, file, _,  _ := runtime.Caller(0)
 
-	input, _ := os.Open(path.Dir(file) + "/example")
+	input, _ := os.Open(path.Dir(file) + "/input")
 
 	defer input.Close()
 	scanner := bufio.NewScanner(input)
@@ -25,71 +25,35 @@ func main() {
 	scanner.Scan()
 	inputStr := strings.Split(scanner.Text(), "")
 
-	count := 0
-	fillSize := 1000000
-
-	cups := ring.New(fillSize)
-	cupsInt := []int{}
+	cups := ring.New(len(inputStr))
 
 	for _,s := range inputStr {
 		cup, _ := strconv.Atoi(s)
 		cups.Value = cup
 		cups = cups.Next()
-		cupsInt = append(cupsInt, cup)
-		count++
 	}
 
-	for at := 10; count < fillSize; at++ {
-		cups.Value = at
-		cups = cups.Next()
-		cupsInt = append(cupsInt, at)
-		count++
-	}
-
-	//Print("0", cups)
-	moves := 10000000
-	fmt.Println(moves)
-	for at :=1; at <= moves;at++ {
-		fmt.Println(float64(at) / float64(moves) * 100)
+	moves := 100
+	for moves > 0 {
 		cups = Move(cups)
-		//moved := MoveRingTo(1, Clone(cups))
-		//Print(strconv.Itoa(at), cups)
-		//fmt.Println(strconv.Itoa(at), predict(cupsInt, at, fillSize))
-		//fmt.Println(strconv.Itoa(at), moved.Next().Value)
+		moves--
 	}
 
 	cups = MoveRingTo(1, cups)
 
-	fmt.Println(cups.Value, cups.Next().Value, cups.Next().Next().Value)
-
-	//fmt.Printf("Part 1: %s\n", String(cups.Unlink(GetMaxValue(cups) - 1)))
+	fmt.Printf("Part 1: %s\n", String(cups.Unlink(GetMaxValue(cups) - 1)))
 	fmt.Printf("Part 2: %d\n", 0)
-}
-
-func predict(set []int, iteration int, size int) []int {
-
-	// (at - 1) - (iteration - 1) mod size
-	values := make([]int, size)
-
-    for position,value := range set {
-		at := mod((position - 1 - (iteration - 1)), size)
-		fmt.Println(mod(position, 2)) // start here skip + 1 and see if we cant figure anything out
-		values[at] = value
-    }
-
-	return values
 }
 
 func Move(cups *ring.Ring) *ring.Ring{
 
-	removeCount := 3
 	maxValue := GetMaxValue(cups)
 
 	// Current value
 	current := cups.Value.(int)
 
-	// remove
-	removed := cups.Unlink(removeCount)
+	// remove 3
+	removed := cups.Unlink(3)
 	destination := GetDestination(current, removed, maxValue)
 
 	//move to desination
@@ -121,7 +85,7 @@ func GetDestination(current int, removed *ring.Ring, maxValue int) int {
 
 	// if value is in removed try again
     removed.Do(func(p interface{}) {
-        if p.(int) == current {	
+        if p.(int) == current {
 			isRemoved = true
         }
     })
@@ -172,19 +136,4 @@ func MoveRingTo(value int, cups *ring.Ring) *ring.Ring {
     }
 
 	return cups
-}
-
-func Clone(cups *ring.Ring) *ring.Ring {
-	newCups := ring.New(cups.Len())
-	cups.Do(func(p interface{}) {
-		newCups.Value = p.(int)
-		newCups = newCups.Next()
-
-	})
-
-	return newCups
-}
-
-func mod(a, b int) int {
-    return (a % b + b) % b
 }
