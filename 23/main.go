@@ -1,6 +1,7 @@
 package main
 
 import (
+	"stevee2112/aoc-2020/util"
 	"fmt"
 	"os"
 	"runtime"
@@ -25,57 +26,89 @@ func main() {
 	scanner.Scan()
 	inputStr := strings.Split(scanner.Text(), "")
 
-	cups := ring.New(len(inputStr))
+	current := 0
+	fillSize := 9
+	arraySize := fillSize+ 1
+	cups := make([]int, arraySize)
 
-	for _,s := range inputStr {
-		cup, _ := strconv.Atoi(s)
-		cups.Value = cup
-		cups = cups.Next()
+	for i := 0 ; i < fillSize; i++ {
+		if i < len(inputStr) {
+			s := inputStr[i]
+			cup, _ := strconv.Atoi(s)
+			var value int
+
+			if i == len(inputStr) - 1 {
+				value,_ = strconv.Atoi(inputStr[0])
+			} else {
+				value,_ = strconv.Atoi(inputStr[i + 1])
+			}
+			cups[cup] = value
+
+			if i == 0 { // set current to first cup
+				current = cup
+			}
+		} else {
+
+			var value int
+			if i == fillSize - 1 {
+				value,_ = strconv.Atoi(inputStr[0])
+			} else {
+				value = i + 1
+			}
+
+			cups[i] = value
+		}
 	}
+
+	cupsPtr := &cups
 
 	moves := 100
-	for moves > 0 {
-		cups = Move(cups)
-		moves--
+	for at := 0; at < moves; at++ {
+		current, cupsPtr = Move(current, cupsPtr)
 	}
 
-	cups = MoveRingTo(1, cups)
+	endLabels := GetLabels(cups[1], fillSize - 1, cups)
 
-	fmt.Printf("Part 1: %s\n", String(cups.Unlink(GetMaxValue(cups) - 1)))
-	fmt.Printf("Part 2: %d\n", 0)
+	strLabels := []string{}
+	for _,label := range endLabels {
+		strLabels = append(strLabels, strconv.Itoa(label))
+	}
+
+	fmt.Printf("Part 1: %s\n", strings.Join(strLabels, ""))
+	// fmt.Printf("Part 2: %d\n", 0)
 }
 
-func Move(cups *ring.Ring) *ring.Ring{
+func Move(current int, cups *[]int) (int, *[]int) {
 
-	maxValue := GetMaxValue(cups)
+	removeCount := 3
+	maxValue := util.Max(*cups)
 
-	// Current value
-	current := cups.Value.(int)
+	// Get start of removed
+	destination := GetDestination(current, GetLabels((*cups)[current], 3, *cups), maxValue)
 
-	// remove 3
-	removed := cups.Unlink(3)
-	destination := GetDestination(current, removed, maxValue)
+	// get what current is pointing to (conceptually, the start of the removed set)
+	currentPointer := (*cups)[current]
 
-	//move to desination
-	for cups.Value.(int) != destination {
-		cups = cups.Move(1)
-	}
+	// get what end if removed is current pointing to
+	removedEndPointer := GetNext(current, removeCount, *cups)
 
-	// add removed cups
-	cups = cups.Link(removed)
+	// get and store what destination is currently pointing do
+	desPointer := (*cups)[destination]
 
-	//move back to destination
-	for cups.Value.(int) != current {
-		cups = cups.Move(1)
-	}
+	// Point current to end of removed (conceptually remove remove set)
+	(*cups)[current] = (*cups)[removedEndPointer]
 
-	// Finally move current forward 1
-	cups = cups.Move(1)
+	// Point destinatation to end of removed set
+	(*cups)[destination] = currentPointer
 
-	return cups
+
+	// Point end remove set to what destination WAS pointing to
+	(*cups)[removedEndPointer] = desPointer
+
+	return (*cups)[current], cups
 }
 
-func GetDestination(current int, removed *ring.Ring, maxValue int) int {
+func GetDestination(current int, removed []int, maxValue int) int {
 	current = current - 1
 	isRemoved := false
 
@@ -84,11 +117,12 @@ func GetDestination(current int, removed *ring.Ring, maxValue int) int {
 	}
 
 	// if value is in removed try again
-    removed.Do(func(p interface{}) {
-        if p.(int) == current {
+
+	for _,removedValue := range removed {
+        if removedValue == current {
 			isRemoved = true
         }
-    })
+    }
 
 	if isRemoved {
 		current = GetDestination(current, removed, maxValue)
@@ -97,24 +131,47 @@ func GetDestination(current int, removed *ring.Ring, maxValue int) int {
 	return current
 }
 
-func String(cups *ring.Ring) string {
-	ring := []string{}
-	// Iterate through the combined ring and print its contents
-	cups.Do(func(p interface{}) {
-		ring = append(ring, strconv.Itoa((p.(int))))
-	})
+func GetNext(current int, size int, cups []int) int {
 
-	return strings.Join(ring, "")
+	at := current
+	for size > 0 {
+		at = cups[at]
+		size--
+	}
+
+	return at
 }
 
-func Print(label string, cups *ring.Ring) {
-	ring := []string{}
-	// Iterate through the combined ring and print its contents
-	cups.Do(func(p interface{}) {
-		ring = append(ring, strconv.Itoa((p.(int))))
-	})
+func GetLabels(current int, size int, cups []int) []int {
 
-	fmt.Println(label, strings.Join(ring, ", "))
+	labels := []int{}
+
+	at := current
+	for size > 0 {
+		labels = append(labels, at)
+		at = cups[at]
+		size--
+	}
+
+	return labels
+}
+
+
+func Print(label string, current int, cups []int) {
+
+	cupsStr := []string{strconv.Itoa(current)}
+
+	at := cups[current]
+	for {
+		if at == current {  // reached end of loop
+			break
+		}
+
+		cupsStr = append(cupsStr, strconv.Itoa(at))
+		at = cups[at]
+	}
+
+	fmt.Println(label, strings.Join(cupsStr, ", "))
 }
 
 func GetMaxValue(cups *ring.Ring) int {
