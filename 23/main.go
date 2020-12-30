@@ -1,7 +1,6 @@
 package main
 
 import (
-	"stevee2112/aoc-2020/util"
 	"fmt"
 	"os"
 	"runtime"
@@ -9,8 +8,6 @@ import (
 	"bufio"
 	"strings"
 	"strconv"
-	//	"regexp"
-    "container/ring"
 )
 
 func main() {
@@ -27,21 +24,72 @@ func main() {
 	inputStr := strings.Split(scanner.Text(), "")
 
 	current := 0
-	fillSize := 9
-	arraySize := fillSize+ 1
+	currentPart1 := 0
+	fillSize := 1000000
+	arraySize := fillSize + 1
 	cups := make([]int, arraySize)
+	maxValue := 0
 
+	cupsPart1 := make([]int, len(inputStr) + 1)
+
+	for i,s := range inputStr {
+		cup, _ := strconv.Atoi(s)
+
+		var value int
+
+		if i == len(inputStr) - 1 {
+			value,_ = strconv.Atoi(inputStr[0])
+		} else {
+			value,_ = strconv.Atoi(inputStr[i + 1])
+		}
+
+		cupsPart1[cup] = value
+
+		if i == 0 { // set current to first cup
+			currentPart1 = cup
+		}
+
+	}
+
+	// Part 1
+	cupsPtr := &cupsPart1
+
+	moves := 100
+	for at := 0; at < moves; at++ {
+		currentPart1, cupsPtr = Move(currentPart1, cupsPtr, 9)
+	}
+
+	endLabels := GetLabels(cupsPart1[1], 8, cupsPart1)
+
+	strLabels := []string{}
+	for _,label := range endLabels {
+		strLabels = append(strLabels, strconv.Itoa(label))
+	}
+
+	fmt.Printf("Part 1: %s\n", strings.Join(strLabels, ""))
+
+	// Part 2
 	for i := 0 ; i < fillSize; i++ {
 		if i < len(inputStr) {
 			s := inputStr[i]
 			cup, _ := strconv.Atoi(s)
+
+			if	cup > maxValue {
+				maxValue = cup
+			}
+
 			var value int
 
 			if i == len(inputStr) - 1 {
-				value,_ = strconv.Atoi(inputStr[0])
+				if i == (fillSize - 1) {
+					value,_ = strconv.Atoi(inputStr[0])
+				} else { // filling
+					value = maxValue + 1
+				}
 			} else {
 				value,_ = strconv.Atoi(inputStr[i + 1])
 			}
+
 			cups[cup] = value
 
 			if i == 0 { // set current to first cup
@@ -53,35 +101,27 @@ func main() {
 			if i == fillSize - 1 {
 				value,_ = strconv.Atoi(inputStr[0])
 			} else {
-				value = i + 1
+				value = i + 2
 			}
 
-			cups[i] = value
+			maxValue++
+			cups[i + 1] = value
 		}
 	}
 
-	cupsPtr := &cups
+	cupsPtr = &cups
 
-	moves := 100
+	moves = 10000000
 	for at := 0; at < moves; at++ {
-		current, cupsPtr = Move(current, cupsPtr)
+		current, cupsPtr = Move(current, cupsPtr, maxValue)
 	}
 
-	endLabels := GetLabels(cups[1], fillSize - 1, cups)
-
-	strLabels := []string{}
-	for _,label := range endLabels {
-		strLabels = append(strLabels, strconv.Itoa(label))
-	}
-
-	fmt.Printf("Part 1: %s\n", strings.Join(strLabels, ""))
-	// fmt.Printf("Part 2: %d\n", 0)
+	fmt.Printf("Part 2: %d\n", cups[1] * cups[cups[1]])
 }
 
-func Move(current int, cups *[]int) (int, *[]int) {
+func Move(current int, cups *[]int, maxValue int) (int, *[]int) {
 
 	removeCount := 3
-	maxValue := util.Max(*cups)
 
 	// Get start of removed
 	destination := GetDestination(current, GetLabels((*cups)[current], 3, *cups), maxValue)
@@ -172,25 +212,4 @@ func Print(label string, current int, cups []int) {
 	}
 
 	fmt.Println(label, strings.Join(cupsStr, ", "))
-}
-
-func GetMaxValue(cups *ring.Ring) int {
-
-	maxValue := 0
-	cups.Do(func(p interface{}) {
-		if p.(int) > maxValue {
-			maxValue = p.(int)
-		}
-	})
-
-	return maxValue
-}
-
-func MoveRingTo(value int, cups *ring.Ring) *ring.Ring {
-
-    for cups.Value.(int) != value {
-        cups = cups.Move(1)
-    }
-
-	return cups
 }
